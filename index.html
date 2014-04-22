@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+<!-- 
+    <link rel="stylesheet" href="">
+-->
+
+    <style>
+    body {
+        font-family: Verdana, sans serif;
+    }
+    #wrapper {
+        margin: 0 auto;
+        width: 1000px;
+        height: 100%;
+    }
+
+    #wrapper h1 {
+        margin: 10px auto;
+        text-align: center;
+    }
+    #drawingboard {
+        display: block;
+        margin: auto;
+        background-color: #fdfdfd;
+    }
+
+    footer {
+        margin: 10px;
+        text-align: center;
+    }
+    </style>
+
+    <script type="text/javascript">
+var LYRICS = "\
+Now, this is a story all about how \
+My life got flipped turned upside down \
+And I'd like to take a minute \
+Just sit right there \
+I'll tell you how I became the prince of a town called Bel Air \
+ \
+In west Philadelphia born and raised \
+On the playground was where I spent most of my days \
+Chillin' out maxin' relaxin' all cool \
+And all shootin some b-ball outside of the school \
+When a couple of guys who were up to no good \
+Started making trouble in my neighborhood \
+I got in one little fight and my mom got scared \
+She said 'You're movin' with your auntie and uncle in Bel Air' \
+ \
+I whistled for a cab and when it came near \
+The license plate said fresh and it had dice in the mirror \
+If anything I could say that this cab was rare \
+But I thought 'Nah, forget it' - 'Yo, homes to Bel Air' \
+ \
+I pulled up to the house about seven or eight \
+And I yelled to the cabbie 'Yo homes smell ya later' \
+I looked at my kingdom \
+I was finally there \
+To sit on my throne as the Prince of Bel Air".split(' ');
+
+    var INTERVALRATE = 30,
+        isRunning = false;
+
+    var Debug = {
+      stop : function() { clearInterval(interval); isRunning = false;},
+      start : function() {
+        var ir = INTERVALRATE,
+            fn = drawLyrics;
+
+        if (isRunning) return;
+
+        if (arguments.length === 1) {
+            // interval
+            ir = arguments[0];
+        }
+        else if (arguments.length === 2) {
+            // fn, interval
+            fn = arguments[0];
+            ir = arguments[1];
+        }
+        interval = setInterval(fn,ir);
+        isRunning = true;
+        return interval;
+      },
+      toggle : function() {
+        if (isRunning) {
+            this.stop();
+        }
+        else {
+            this.start();
+        }
+      }
+    };
+
+
+    window.onload = function() {
+
+        canvas = document.getElementById('drawingboard'),
+        ctx = canvas.getContext('2d');
+
+        canvas.onclick = function() {
+            Debug.toggle();
+        }
+        interval = setInterval(drawLyrics,INTERVALRATE);
+        isRunning = true;
+
+    }
+
+    var canvas,
+        ctx,
+        interval;
+
+
+    function makeBlob() {
+        var _xSpeed = _ySpeed = 0;
+
+        while ((_xSpeed === 0) && (_ySpeed === 0)){
+            _xSpeed = randomRange(-7,7);
+            _ySpeed = randomRange(-7,7);
+        }
+
+        return {
+            x : randomRange(200,300),
+            y : randomRange(180,300),
+            xSpeed : _xSpeed,
+            ySpeed : _ySpeed,
+            color : {
+                r : randomRange(0,255),
+                g : randomRange(0,255),
+                b : randomRange(0,255),
+                a : parseFloat(randomRange(0,1000)/1000)
+            }
+        };
+    }
+
+    function randomRange(start,end) {
+        // start & end are inclusive
+        // eg: randomRange(1,2) produces results in range [1,2]
+        // pre-condition: emd > start
+        var delta = Math.abs(end-start);
+        
+        return Math.round(Math.abs(Math.random() * (delta+1)) + start)
+
+    }
+
+    var framesCounter = framesToWait = 10,
+        curWord=0,
+        lyricArray = [];
+
+    function drawLyrics() {
+
+        if (framesCounter !== framesToWait) {
+            framesCounter++;
+        }
+        else {
+            framesCounter = 0;
+            var word = makeBlob();
+            word.text = LYRICS[curWord++ % LYRICS.length];
+            lyricArray.push(word);
+        }
+
+        ctx.clearRect(0,0,500,500);
+
+        for (var j=0; j<lyricArray.length; j++) {
+
+            var _blob = lyricArray[j];
+            var rgbs = 'rgba(' + _blob.color.r + ',' + _blob.color.g + ',' + _blob.color.b + ',' + _blob.color.a + ')';
+            ctx.font = "40pt Verdana";
+            ctx.fillStyle = rgbs;
+            ctx.fillText(_blob.text, _blob.x,_blob.y);
+            _blob.x = _blob.x + _blob.xSpeed;
+            _blob.y = _blob.y + _blob.ySpeed;
+
+        }
+
+    }
+    
+
+    /* ************************************
+       ************************************
+        TODO
+
+            - more styling
+            - lyricArray will grow w/o bounds. should clear elements that are off-screen
+
+        ***********************************
+        ***********************************
+    */
+
+    </script>
+</head>
+<body>
+    <div id="wrapper">
+        <h1>willarious web programming</h1>
+        <canvas id="drawingboard" height="500px" width="500px">Your browser doesn't support canvas so this is pretty boring</canvas>
+
+        <footer>inspired by creative js's vid: <a href="http://vimeo.com/36278748">http://vimeo.com/36278748</a></footer>
+    </div>
+</body>
+</html>
